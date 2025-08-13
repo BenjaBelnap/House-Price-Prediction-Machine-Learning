@@ -43,8 +43,6 @@ def prepare_data(df):
     try:
         print("Starting data preparation...")
         
-        # First, check data quality
-        quality_report = check_data_quality(df)
         
         # Remove outliers from the SalePrice column
         print("\nRemoving outliers from SalePrice...")
