@@ -25,7 +25,10 @@ def install_requirements():
         'polars',
         'matplotlib',
         'seaborn',
-        'jupyter'
+        'jupyter',
+        'fastapi',
+        'uvicorn',
+        'pydantic'
     ]
     
     python_path = get_python_path()
