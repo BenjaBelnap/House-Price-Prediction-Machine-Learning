@@ -67,17 +67,17 @@ function renderForm() {
     const topFeatures = featuresData.top_features || [];
     const allFeatures = Object.keys(featuresData.feature_defaults);
     
-    // Render essential features (top 10 most important)
-    topFeatures.slice(0, 10).forEach(feature => {
+    // Render essential features (top 15 most important)
+    topFeatures.slice(0, 15).forEach(feature => {
         const formGroup = createFormGroup(feature, true);
         essentialContainer.appendChild(formGroup);
     });
     
-    // Render additional features (remaining features, limited to reasonable number)
+    // Render additional features (remaining features, show more for completeness)
     const additionalFeatures = allFeatures
-        .filter(feature => !topFeatures.slice(0, 10).includes(feature))
-        .filter(feature => !feature.includes('_')) // Remove dummy variables for cleaner UI
-        .slice(0, 20); // Limit to 20 additional features
+        .filter(feature => !topFeatures.slice(0, 15).includes(feature))
+        // .filter(feature => !feature.includes('_')) // Commented out to show dummy variables too
+        .slice(0, 200); // Show up to 100 additional features
     
     additionalFeatures.forEach(feature => {
         const formGroup = createFormGroup(feature, false);
