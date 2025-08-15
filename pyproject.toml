@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "house-price-prediction"
+version = "0.1.0"
+description = "House Price Prediction ML project with FastAPI and frontend"
+authors = ["Ben Belnap <you@example.com>"]
+readme = "README.md"
+packages = [
+  { include = "src" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+numpy = "*"
+pandas = "*"
+scikit-learn = "*"
+xgboost = "*"
+polars = "*"
+matplotlib = "*"
+seaborn = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+pydantic = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+poethepoet = "*"
+requests = "*"
+
+[tool.poe.tasks]
+unit = "pytest -q -m unit"
+test = "pytest -q"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+  "unit: fast unit tests for local development",
+  "slow: slow or integration tests",
+  "e2e: end-to-end tests requiring running servers"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
