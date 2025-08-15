@@ -8,10 +8,12 @@ This project implements a machine learning solution to predict house prices usin
 ```
 House-Price-Prediction-Machine-Learning/
 ├── data/                   # Dataset storage
+├── frontend/               # Front end application
 ├── models/                 # Saved model files
 ├── notebooks/             # Jupyter notebooks
 │   └── house_price_prediction.ipynb
 └── src/                   # Source code
+
 ```
 
 ## Setup Instructions
