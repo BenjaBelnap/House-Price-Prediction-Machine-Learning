@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Predictor</title>
+    <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">House Price Predictor</h1>
+            <p class="subtitle">Get an accurate estimate of your home's value using advanced machine learning</p>
+        </header>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading features...</p>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="form-container">
+                <h2 class="form-title">Property Details</h2>
+                <form id="predictionForm">
+                    <div class="feature-sections">
+                        <div class="section">
+                            <h3 class="section-title">
+                                <span class="icon">🏠</span>
+                                Essential Features
+                                <span class="importance-badge">Most Important</span>
+                            </h3>
+                            <div class="form-grid" id="essentialFeatures"></div>
+                        </div>
+
+                        <div class="section">
+                            <h3 class="section-title">
+                                <span class="icon">📊</span>
+                                Additional Features
+                                <span class="optional-badge">Optional</span>
+                            </h3>
+                            <div class="form-grid" id="additionalFeatures"></div>
+                        </div>
+                    </div>
+
+                    <div class="submit-container">
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <span class="btn-text">Get Price Estimate</span>
+                            <span class="btn-spinner" style="display: none;">Calculating...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="result-container" id="resultContainer" style="display: none;">
+                <div class="result-card">
+                    <h2 class="result-title">Price Estimate</h2>
+                    <div class="price-display">
+                        <span class="currency">$</span>
+                        <span class="price" id="predictedPrice">0</span>
+                    </div>
+                    
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Model Used:</span>
+                            <span class="detail-value" id="modelUsed">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Confidence (R²):</span>
+                            <span class="detail-value" id="confidence">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Features Provided:</span>
+                            <span class="detail-value" id="featuresProvided">-</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="secondary-btn" onclick="resetForm()">New Estimate</button>
+                        <button class="primary-btn" onclick="showDetails()">View Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="details-modal" id="detailsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Estimation Details</h3>
+                    <button class="close-btn" onclick="closeDetails()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="feature-breakdown" id="featureBreakdown"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>

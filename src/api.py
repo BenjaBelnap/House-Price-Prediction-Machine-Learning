@@ -95,14 +95,46 @@ async def list_models():
 
 @app.get("/features")
 async def get_features():
-    """Get list of all features and their default values"""
+    """Get list of all features, their default values, and importance rankings"""
+    # Get feature importance from the best model
+    best_model_name = min(
+        models.items(),
+        key=lambda x: x[1]['metadata']['metrics']['test']['mae'] 
+            if 'test' in x[1]['metadata']['metrics'] 
+            else x[1]['metadata']['metrics']['mae']
+    )[0]
+    
+    feature_importance = {}
+    if best_model_name in models:
+        model_info = models[best_model_name]
+        if hasattr(model_info['model'], 'feature_importances_'):
+            importances = model_info['model'].feature_importances_
+            feature_names = model_info['metadata']['features']
+            
+            # Create importance dictionary
+            importance_dict = dict(zip(feature_names, importances))
+            
+            # Sort by importance and get top features
+            sorted_features = sorted(importance_dict.items(), key=lambda x: x[1], reverse=True)
+            
+            for i, (feature, importance) in enumerate(sorted_features):
+                feature_importance[feature] = {
+                    'importance': float(importance),
+                    'rank': i + 1,
+                    'is_top_10': i < 10
+                }
+    
     return {
         "feature_defaults": feature_defaults,
+        "feature_importance": feature_importance,
         "numerical_features": [col for col in feature_defaults.keys() 
                              if isinstance(feature_defaults[col], (int, float)) 
                              and not isinstance(feature_defaults[col], bool)],
         "categorical_features": [col for col in feature_defaults.keys() 
-                               if isinstance(feature_defaults[col], str)]
+                               if isinstance(feature_defaults[col], str)],
+        "top_features": [f[0] for f in sorted(feature_importance.items(), 
+                                            key=lambda x: x[1]['importance'], 
+                                            reverse=True)[:10]] if feature_importance else []
     }
 
 @app.post("/predict", response_model=PredictionResponse)
