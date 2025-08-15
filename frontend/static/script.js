@@ -106,7 +106,7 @@ function createFormGroup(feature, isImportant = false) {
             id="${feature}" 
             name="${feature}" 
             class="form-input"
-            placeholder="${isImportant ? 'Required' : 'Optional (default: ' + defaultValue + ')'}"
+            placeholder="${isImportant ? 'Important (default: ' + defaultValue + ')' : 'Optional (default: ' + defaultValue + ')'}"
             ${isNumerical ? 'step="any"' : ''}
         >
     `;
