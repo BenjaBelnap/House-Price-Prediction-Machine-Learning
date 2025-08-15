@@ -41,6 +41,24 @@ source .venv/bin/activate
 jupyter notebook
 ```
 
+## Running Tests
+
+This project uses Poetry for dependency management and pytest for testing. Quick commands:
+
+- Unit tests only (fast):
+	- PowerShell:
+		```powershell
+		poetry run poe unit
+		```
+
+- All tests:
+	- PowerShell:
+		```powershell
+		poetry run poe test
+		```
+
+See `tests/README.md` for in-depth testing docs, markers, and troubleshooting.
+
 ## Project Timeline
 - Data exploration: August 1st to 3rd
 - Data cleaning and preparation: August 4th to 8th
