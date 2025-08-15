@@ -1,2 +1,7 @@
 data/AmesHousing.csv
 src/__pycache__/*
+frontend/__pycache__/*
+tests/__pycache__/*
+tests/unit/__pycache__/*
+tests/frontend/__pycache__/*
+tests/api/__pycache__/*
