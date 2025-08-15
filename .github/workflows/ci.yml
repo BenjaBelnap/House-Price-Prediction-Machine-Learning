@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          echo "POETRY_HOME=$HOME/.local/bin" >> $GITHUB_ENV
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry to create venv in project
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry --version
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: |
+          poetry install --no-interaction
+
+      - name: Run unit tests on PRs, full tests on push
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            poetry run poe unit
+          else
+            poetry run poe test
+          fi
