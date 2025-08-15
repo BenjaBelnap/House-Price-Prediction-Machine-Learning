@@ -191,6 +191,20 @@ body {
     margin-top: 2rem;
 }
 
+.submit-container.top-submit {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.submit-hint {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
 .submit-btn {
     background: linear-gradient(45deg, #667eea, #764ba2);
     color: white;

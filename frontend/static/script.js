@@ -179,17 +179,18 @@ async function makePrediction() {
 
 // Set loading state for submit button
 function setLoadingState(isLoading) {
-    const btnText = document.querySelector('.btn-text');
-    const btnSpinner = document.querySelector('.btn-spinner');
+    const btnTexts = document.querySelectorAll('.btn-text');
+    const btnSpinners = document.querySelectorAll('.btn-spinner');
+    const submitBtns = document.querySelectorAll('[type="submit"]');
     
     if (isLoading) {
-        btnText.style.display = 'none';
-        btnSpinner.style.display = 'inline';
-        submitBtnEl.disabled = true;
+        btnTexts.forEach(text => text.style.display = 'none');
+        btnSpinners.forEach(spinner => spinner.style.display = 'inline');
+        submitBtns.forEach(btn => btn.disabled = true);
     } else {
-        btnText.style.display = 'inline';
-        btnSpinner.style.display = 'none';
-        submitBtnEl.disabled = false;
+        btnTexts.forEach(text => text.style.display = 'inline');
+        btnSpinners.forEach(spinner => spinner.style.display = 'none');
+        submitBtns.forEach(btn => btn.disabled = false);
     }
 }
 
