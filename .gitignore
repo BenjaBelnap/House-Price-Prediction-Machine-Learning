@@ -9,3 +9,5 @@ poetry.lock
 docs/pdfs/*
 build/house_price_app.py
 build/house_price_app.spec
+*.exe
+/build/dist
