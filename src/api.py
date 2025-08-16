@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import os
@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
+import time
+import logging
 
 app = FastAPI(
     title="House Price Prediction API",
@@ -53,10 +55,21 @@ try:
     for col in categorical_cols:
         feature_defaults[col] = reference_data[col].mode()[0]
     
+    # Pre-compute SalePrice histogram for insights if available
+    saleprice_hist = None
+    if 'SalePrice' in reference_data.columns:
+        counts, bin_edges = np.histogram(reference_data['SalePrice'].dropna(), bins=20)
+        centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
+        saleprice_hist = {
+            'counts': counts.astype(int).tolist(),
+            'bin_edges': bin_edges.astype(float).tolist(),
+            'centers': centers.astype(float).tolist(),
+        }
     print("Feature defaults calculated from reference data")
 except Exception as e:
     print(f"Error loading reference data for defaults: {str(e)}")
     feature_defaults = {}  # Empty defaults if reference data can't be loaded
+    saleprice_hist = None
 
 # Load trained models
 try:
@@ -85,6 +98,28 @@ class PredictionResponse(BaseModel):
     features_used: Dict[str, Any]
     missing_features: List[str]
 
+# --- Basic logging and in-memory metrics for monitoring ---
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("house-price-api")
+
+request_metrics: Dict[str, Any] = {
+    'request_count': 0,
+    'per_path': {},
+    'prediction_count': 0,
+    'last_prediction_ts': None,
+}
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    start = time.time()
+    path = request.url.path
+    request_metrics['request_count'] += 1
+    request_metrics['per_path'][path] = request_metrics['per_path'].get(path, 0) + 1
+    response = await call_next(request)
+    duration_ms = int((time.time() - start) * 1000)
+    logger.info(f"%s %s -> %s in %dms", request.method, path, getattr(response, 'status_code', '200'), duration_ms)
+    return response
+
 @app.get("/")
 async def root():
     """API root endpoint with basic info"""
@@ -93,7 +128,10 @@ async def root():
         "endpoints": {
             "GET /models": "List all available models",
             "POST /predict": "Make a house price prediction",
-            "GET /features": "Get required features and their default values"
+            "GET /features": "Get required features and their default values",
+            "GET /insights": "Get histogram and summary insights for dashboard",
+            "GET /health": "Health check",
+            "GET /metrics": "Basic API metrics"
         }
     }
 
@@ -152,6 +190,33 @@ async def get_features():
                                             reverse=True)[:10]] if feature_importance else []
     }
 
+@app.get("/insights")
+async def get_insights():
+    """Return precomputed insights for visualizations (histogram, counts)."""
+    feature_counts = {
+        'numerical': len([col for col, val in feature_defaults.items() if isinstance(val, (int, float)) and not isinstance(val, bool)]),
+        'categorical': len([col for col, val in feature_defaults.items() if isinstance(val, str)]),
+    }
+    best_model_name = None
+    best_r2 = None
+    try:
+        best_model_name = min(
+            models.items(),
+            key=lambda x: x[1]['metadata']['metrics']['test']['mae'] 
+                if 'test' in x[1]['metadata']['metrics'] 
+                else x[1]['metadata']['metrics']['mae']
+        )[0]
+        metrics = models[best_model_name]['metadata']['metrics']
+        best_r2 = (metrics.get('test') or {}).get('r2') or metrics.get('r2')
+    except Exception:
+        pass
+    return {
+        'feature_counts': feature_counts,
+        'saleprice_histogram': saleprice_hist,
+        'best_model': best_model_name,
+        'best_model_r2': best_r2,
+    }
+
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
     """Make a house price prediction with optional features"""
@@ -204,6 +269,10 @@ async def predict(request: PredictionRequest):
     try:
         prediction = model_info['model'].predict(X)[0]
         
+        # update metrics
+        request_metrics['prediction_count'] += 1
+        request_metrics['last_prediction_ts'] = time.time()
+
         return PredictionResponse(
             predicted_price=float(prediction),
             model_used=request.model_name,
@@ -216,6 +285,20 @@ async def predict(request: PredictionRequest):
             status_code=500,
             detail=f"Prediction error: {str(e)}"
         )
+
+@app.get("/health")
+async def health():
+    """Simple health check endpoint."""
+    return {
+        'status': 'ok',
+        'models_loaded': len(models),
+        'has_reference_data': bool(feature_defaults),
+    }
+
+@app.get("/metrics")
+async def metrics():
+    """Return basic in-memory metrics for monitoring."""
+    return request_metrics
 
 if __name__ == "__main__":
     import uvicorn
