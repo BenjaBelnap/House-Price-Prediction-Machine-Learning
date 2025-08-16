@@ -16,6 +16,7 @@ const detailsModalEl = document.getElementById('detailsModal');
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     loadFeatures();
+    loadInsights();
 });
 
 // Load features from API
@@ -32,6 +33,92 @@ async function loadFeatures() {
     } catch (error) {
         console.error('Error loading features:', error);
         showError('Failed to load application. Please ensure the API server is running.');
+    }
+}
+
+// Load insights for visualizations
+async function loadInsights() {
+    try {
+        const resp = await fetch(`${API_BASE_URL}/insights`);
+        if (!resp.ok) return;
+        const insights = await resp.json();
+        renderInsights(insights);
+    } catch (e) {
+        console.warn('Insights not available', e);
+    }
+}
+
+function renderInsights(insights) {
+    // Show grid
+    const grid = document.getElementById('insightsGrid');
+    if (grid) grid.style.display = 'grid';
+
+    // 1) Feature importance bar chart from /features importance
+    if (featuresData && featuresData.feature_importance) {
+        const entries = Object.entries(featuresData.feature_importance)
+            .sort((a,b) => b[1].importance - a[1].importance)
+            .slice(0, 10);
+        const max = Math.max(...entries.map(e => e[1].importance));
+        const container = document.getElementById('featureImportanceChart');
+        if (container) {
+            container.innerHTML = '';
+            entries.forEach(([name, obj]) => {
+                const row = document.createElement('div');
+                row.className = 'bar-row';
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = formatFeatureName(name);
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const fill = document.createElement('div');
+                fill.className = 'bar-fill';
+                fill.style.width = `${(obj.importance / max) * 100}%`;
+                bar.appendChild(fill);
+                row.appendChild(label);
+                row.appendChild(bar);
+                container.appendChild(row);
+            });
+        }
+    }
+
+    // 2) R2 gauge
+    const r2 = insights.best_model_r2 || 0;
+    const pct = Math.max(0, Math.min(1, r2));
+    const circumference = 2 * Math.PI * 40; // r=40
+    const dash = Math.round(circumference * pct);
+    const arc = document.getElementById('gaugeArc');
+    const txt = document.getElementById('gaugeText');
+    if (arc) {
+        arc.setAttribute('stroke-dasharray', `${dash} ${Math.round(circumference)}`);
+    }
+    if (txt) {
+        txt.textContent = `${(pct * 100).toFixed(0)}%`;
+    }
+
+    // 3) Feature types pie legend (simple legend and percentages)
+    const total = (insights.feature_counts?.numerical || 0) + (insights.feature_counts?.categorical || 0);
+    const legend = document.getElementById('featureTypeLegend');
+    const graphic = document.getElementById('featureTypeGraphic');
+    if (legend && total > 0) {
+        legend.innerHTML = '';
+        const items = [
+            { name: 'Numerical', value: insights.feature_counts.numerical, color: '#667eea' },
+            { name: 'Categorical', value: insights.feature_counts.categorical, color: '#764ba2' },
+        ];
+        items.forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'legend-item';
+            row.innerHTML = `
+                <span class="legend-swatch" style="background:${it.color}"></span>
+                <span class="legend-name">${it.name}</span>
+                <span class="legend-value">${Math.round((it.value / total) * 100)}%</span>
+            `;
+            legend.appendChild(row);
+        });
+        if (graphic) {
+            const pctNum = Math.round((insights.feature_counts.numerical / total) * 100);
+            graphic.style.background = `conic-gradient(#667eea ${pctNum}%, #764ba2 0)`;
+        }
     }
 }
 
