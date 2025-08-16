@@ -7,3 +7,5 @@ tests/frontend/__pycache__/*
 tests/api/__pycache__/*
 poetry.lock
 docs/pdfs/*
+build/house_price_app.py
+build/house_price_app.spec
