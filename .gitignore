@@ -6,3 +6,4 @@ tests/unit/__pycache__/*
 tests/frontend/__pycache__/*
 tests/api/__pycache__/*
 poetry.lock
+docs/pdfs/*
