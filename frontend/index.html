@@ -23,6 +23,33 @@
         </div>
 
         <div class="main-content" id="mainContent" style="display: none;">
+            
+            <!-- Dashboard Insights -->
+            <div class="insights-grid" id="insightsGrid" style="display: none;">
+                <div class="card">
+                    <h3 class="card-title">Top Feature Importance</h3>
+                    <div id="featureImportanceChart" class="bar-chart"></div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">Model Confidence (R²)</h3>
+                    <div class="gauge" id="r2Gauge">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="12" fill="none"></circle>
+                            <circle id="gaugeArc" cx="50" cy="50" r="40" stroke="#667eea" stroke-width="12" fill="none"
+                                    stroke-linecap="round" transform="rotate(-90 50 50)" stroke-dasharray="0 251"></circle>
+                            <text id="gaugeText" x="50" y="55" text-anchor="middle" font-size="16" fill="#333">--%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">Feature Types</h3>
+                    <div class="pie" id="featureTypePie">
+                        <div class="pie-graphic" id="featureTypeGraphic"></div>
+                        <div class="pie-legend" id="featureTypeLegend"></div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="form-container">
                 <h2 class="form-title">Property Details</h2>
                 <form id="predictionForm">
@@ -93,6 +120,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <div class="details-modal" id="detailsModal" style="display: none;">
