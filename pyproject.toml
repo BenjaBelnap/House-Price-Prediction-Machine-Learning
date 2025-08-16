@@ -25,6 +25,7 @@ pydantic = "*"
 pytest = "*"
 poethepoet = "*"
 requests = "*"
+httpx = "*"
 
 [tool.poe.tasks]
 unit = "pytest -q -m unit"
